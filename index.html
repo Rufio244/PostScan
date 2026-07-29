@@ -1,1 +1,60 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>🧩 PostScan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen p-4 max-w-5xl mx-auto">
+    <header class="text-center mb-8">
+        <h1 class="text-4xl font-bold text-purple-400">🧩 PostScan</h1>
+        <p class="text-gray-300">สแกน วิเคราะห์ ผสานรวม และปรับโครงสร้าง</p>
+    </header>
+
+    <div class="grid md:grid-cols-2 gap-6 mb-6">
+        <div class="bg-gray-800 p-5 rounded-xl">
+            <h3 class="text-xl text-yellow-300 mb-3">🔑 บัญชีผู้ใช้</h3>
+            <select id="act" class="w-full p-2 mb-3 bg-gray-700 rounded">
+                <option value="login">เข้าสู่ระบบ</option>
+                <option value="reg">สมัครสมาชิก</option>
+            </select>
+            <input id="user" placeholder="ชื่อผู้ใช้" class="w-full p-2 mb-2 bg-gray-700 rounded">
+            <input id="pass" type="password" placeholder="รหัสผ่าน / รหัสเจ้าของ Postscan244" class="w-full p-2 mb-3 bg-gray-700 rounded">
+            <button onclick="doAuth()" class="w-full bg-purple-600 hover:bg-purple-700 p-2 rounded">ยืนยัน</button>
+            <p id="msg1" class="mt-2 text-sm"></p>
+        </div>
+
+        <div class="bg-gray-800 p-5 rounded-xl">
+            <h3 class="text-xl text-blue-300 mb-3">🔍 สแกนเป้าหมาย</h3>
+            <input id="target" placeholder="https://example.com" class="w-full p-2 mb-3 bg-gray-700 rounded">
+            <button onclick="doScan()" class="w-full bg-blue-600 hover:bg-blue-700 p-2 rounded">เริ่มทำงาน</button>
+            <p id="msg2" class="mt-2 text-sm"></p>
+        </div>
+    </div>
+
+    <div id="resBox" class="bg-gray-800 p-5 rounded-xl hidden">
+        <h3 class="text-xl text-green-300 mb-3">📊 ผลลัพธ์</h3>
+        <pre id="resText" class="bg-gray-900 p-3 rounded text-sm overflow-x-auto"></pre>
+        <a id="dlBtn" class="inline-block mt-3 bg-green-600 hover:bg-green-700 px-4 py-2 rounded">📄 ดาวน์โหลดรายงาน PDF</a>
+    </div>
+
+<script>
+async function doAuth(){
+    let d = {username:document.getElementById("user").value,password:document.getElementById("pass").value}
+    let u = document.getElementById("act").value=="reg"?"/api/register":"/api/login"
+    let r = await fetch(u,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)}).then(x=>x.json())
+    document.getElementById("msg1").textContent = r.message || r.msg
+}
+
+async function doScan(){
+    document.getElementById("resBox").classList.remove("hidden")
+    document.getElementById("resText").textContent = "กำลังประมวลผล..."
+    let d = {target:document.getElementById("target").value,master_key:document.getElementById("pass").value}
+    let r = await fetch("/api/scan",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)}).then(x=>x.json())
+    document.getElementById("resText").textContent = JSON.stringify(r,null,2)
+    document.getElementById("dlBtn").href = `/api/download/${r.pdf}`
+}
+</script>
+</body>
+</html>
 
